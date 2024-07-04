@@ -3,11 +3,11 @@ import numpy as np
 
 class Cube:
 
-    def __init__(self, size=3, state=None, colours=["y", "w", "o", "r", "b", "g"]):
+    def __init__(self, size=3, state=None, colours=["y", "w", "r", "o", "b", "g"]):
         """
         Yellow on top, Blue in front, Red on right.
-        state is array of faces: [U D L R F B]
-        input to state is string: "yyyyyyyyywwwwwwwwwooooooooorrrrrrrrrbbbbbbbbbggggggggg"
+        state is array of faces: [U D R L F B]
+        input to state is string: "yyyyyyyyywwwwwwwwwrrrrrrrrrooooooooobbbbbbbbbggggggggg"
         """
         if size != 3:
             raise NotImplementedError
@@ -39,31 +39,31 @@ class Cube:
         ]
         self.state = np.array(self.state)
 
-    def turn(self, face, direction):
+    def turn(self, direction):
         """
-        face:       U D L R F B
-        direction:  clock, anti
+        face:       U D R L F B
         """
-        raise NotImplementedError
+        if direction == "U":
+            pass
 
     def print_state(self):
         print(" " * 15, self.state[5][2][::-1])
         print(" " * 15, self.state[5][1][::-1])
         print(" " * 15, self.state[5][0][::-1])
         print(
-            [self.state[2][i][0] for i in range(3)[::-1]],
+            [self.state[3][i][0] for i in range(3)[::-1]],
             self.state[0][0],
-            [self.state[3][i][2] for i in range(3)],
+            [self.state[2][i][2] for i in range(3)],
         )
         print(
-            [self.state[2][i][1] for i in range(3)[::-1]],
+            [self.state[3][i][1] for i in range(3)[::-1]],
             self.state[0][1],
-            [self.state[3][i][1] for i in range(3)],
+            [self.state[2][i][1] for i in range(3)],
         )
         print(
-            [self.state[2][i][2] for i in range(3)[::-1]],
+            [self.state[3][i][2] for i in range(3)[::-1]],
             self.state[0][2],
-            [self.state[3][i][0] for i in range(3)],
+            [self.state[2][i][0] for i in range(3)],
         )
         print(" " * 15, self.state[4][0])
         print(" " * 15, self.state[4][1])
