@@ -1,5 +1,8 @@
 from ursina import *
 from backend.cube import *
+import backend.algo as algo
+import re
+import random
 
 app = Ursina()
 
@@ -70,7 +73,7 @@ collider.input = collider_input
 rotation_helper = Entity()
 
 
-def rotate_side(normal, direction=1, speed=0.7):
+def rotate_side(normal, direction=1, speed=0.5):
     if normal == Vec3(1, 0, 0):
         # right
         [setattr(e, "world_parent", rotation_helper) for e in cubes if e.x > 0]
@@ -143,7 +146,7 @@ def rotate_side(normal, direction=1, speed=0.7):
     if speed:
         collider.ignore_input = True
 
-        @after(0.25 * speed)
+        @after(0.3 * speed)
         def _():
             collider.ignore_input = False
 
@@ -157,12 +160,92 @@ def print_state():
     cube.print_state()
 
 
+def turn(action):
+    """
+    actions: U D R L F B U_p D_p R_p L_p F_p B_p
+    """
+    match action:
+        case "U":
+            rotate_side(Vec3(0, 1, 0))
+        case "U_p":
+            rotate_side(Vec3(0, 1, 0), -1)
+        case "D":
+            rotate_side(Vec3(0, -1, 0))
+        case "D_p":
+            rotate_side(Vec3(0, -1, 0), -1)
+        case "R":
+            rotate_side(Vec3(1, 0, 0))
+        case "R_p":
+            rotate_side(Vec3(1, 0, 0), -1)
+        case "L":
+            rotate_side(Vec3(-1, 0, 0))
+        case "L_p":
+            rotate_side(Vec3(-1, 0, 0), -1)
+        case "F":
+            rotate_side(Vec3(0, 0, -1))
+        case "F_p":
+            rotate_side(Vec3(0, 0, -1), -1)
+        case "B":
+            rotate_side(Vec3(0, 0, 1))
+        case "B_p":
+            rotate_side(Vec3(0, 0, 1), -1)
+
+
+def sequence(seq: list, dtime=0.15):
+    i = 0.6
+    for action in seq:
+        if "2" in action:
+            invoke(Func(turn, action[0]), delay=i)
+            i += dtime
+            invoke(Func(turn, action[0]), delay=i)
+
+        else:
+            invoke(Func(turn, action), delay=i)
+        i += dtime
+
+
+def algo_solve():
+    cubestring = cube.cube_string()
+    seq = algo.ksolve(cubestring)
+    seq = seq.replace("3", "'")
+    seq = seq[:-5].replace("1", "") + seq[-5:-2] + "turns)"
+    seq_text = Text(text=seq, position=(-0.85, 0.45))
+    seq = seq.replace("'", "_p")
+    seq = seq.split(" ")[:-1]
+    # cube.print_state(12)
+    sequence(seq)
+    invoke(Func(destroy, seq_text), delay=10)
+    # cube.print_state(12)
+
+
+def scramble():
+    actions = ["U", "D", "R", "L", "F", "B", "U_p", "D_p", "R_p", "L_p", "F_p", "B_p"]
+    seq = [random.choice(actions)]
+    while len(seq) < random.randint(40, 50):
+        action = random.choice(actions)
+        if action[0] != seq[-1][0]:
+            seq.append(action)
+    sequence(seq)
+
+
 print_button = Button(
     text="print state", color=color.azure, position=(0.7, -0.4), on_click=print_state
 )
 print_button.fit_to_text()
 
+solve_algo_button = Button(
+    text="solve_algo", color=color.azure, position=(0.5, -0.4), on_click=algo_solve
+)
+solve_algo_button.fit_to_text()
+
+scramble_button = Button(
+    text="scramble", color=color.azure, position=(0.3, -0.4), on_click=scramble
+)
+scramble_button.fit_to_text()
+
 window.color = color._16
+window.size = window.fullscreen_size
+window.position = Vec2(0, 0)
 EditorCamera()
 
 cube = Cube()

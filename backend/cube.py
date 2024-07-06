@@ -74,6 +74,28 @@ class Cube:
         print(" " * (d + 1), down[0], "\n", " " * d, down[1], "\n", " " * d, down[2])
         print(" ")
 
+    # return cubestring in URFDLB
+    def cube_string(self) -> str:
+
+        up = "".join(self.state[0, 1:4, 1:4].ravel())  # none
+        down = "".join(self.state[4, 1:4, 1:4][::-1].ravel())
+        right = "".join(np.flip(self.state[1:4, 1:4, 4], axis=1).ravel())
+        left = "".join(self.state[1:4, 1:4, 0].ravel())  # none
+        front = "".join(self.state[1:4, 4, 1:4].ravel())  # none
+        back = "".join(np.flip(self.state[1:4, 0, 1:4], axis=1).ravel())
+
+        colour_string = up + right + front + down + left + back
+        # print("\n", colour_string, "\n")
+        cubestring = (
+            colour_string.replace("y", "U")
+            .replace("w", "D")
+            .replace("r", "R")
+            .replace("o", "L")
+            .replace("b", "F")
+            .replace("g", "B")
+        )
+        return cubestring
+
     def turn(self, action):
         """
         actions: U D R L F B U_p D_p R_p L_p F_p B_p
@@ -106,18 +128,22 @@ class Cube:
 
     def sequence(self, seq: list):
         for action in seq:
-            action = action.replace("'", "_p")
-            self.turn(action)
+            if "2" in action:
+                self.turn(action[0])
+                self.turn(action[0])
+            else:
+                self.turn(action)
 
 
 def main():
-    cube = Cube(
-        input_string="y1 y2 y3 y4 y5 y6 y7 y8 y9 w1 w2 w3 w4 w5 w6 w7 w8 w9 r1 r2 r3 r4 r5 r6 r7 r8 r9 o1 o2 o3 o4 o5 o6 o7 o8 o9 b1 b2 b3 b4 b5 b6 b7 b8 b9 g1 g2 g3 g4 g5 g6 g7 g8 g9"
-    )
+    # cube = Cube(
+    #     input_string="y1 y2 y3 y4 y5 y6 y7 y8 y9 w1 w2 w3 w4 w5 w6 w7 w8 w9 r1 r2 r3 r4 r5 r6 r7 r8 r9 o1 o2 o3 o4 o5 o6 o7 o8 o9 b1 b2 b3 b4 b5 b6 b7 b8 b9 g1 g2 g3 g4 g5 g6 g7 g8 g9"
+    # )
+    cube = Cube()
 
-    cube.sequence(["F"])
+    cube.sequence(["F2"])
     print(cube.state)
-    cube.print_state(d=15)
+    cube.cube_string()
 
 
 if __name__ == "__main__":
