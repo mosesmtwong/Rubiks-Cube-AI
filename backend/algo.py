@@ -1,4 +1,4 @@
-import cube
+from cube import *
 
 
 def main():
